@@ -77,13 +77,16 @@ export default function PinLock({ onUnlock, onForgotPin }: Props) {
 
   return (
     <div className="fixed inset-0 z-[60] bg-slate-950 flex flex-col items-center justify-center gap-6 px-4">
-      <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/20 shrink-0">
-        <Lock size={32} className="text-white" />
-      </div>
+      <img
+        src="/assets/chanchullos-mys-icon.png"
+        alt="Chanchullos MyS"
+        className="w-28 h-28 rounded-3xl object-contain shrink-0 bg-slate-800"
+        style={{ aspectRatio: '1 / 1' }}
+      />
 
       <div className="text-center">
-        <h1 className="text-xl font-bold text-white mb-1">Mi Ahorro</h1>
-        <p className="text-slate-400 text-sm">Ingresa tu PIN para continuar</p>
+        <h1 className="text-xl font-bold text-white mb-1">Chanchullos MyS</h1>
+        <p className="text-slate-400 text-sm">Ingresa tu código para continuar</p>
       </div>
 
       <div className={`flex gap-3 ${error ? 'animate-[shake_400ms_ease]' : ''}`}>

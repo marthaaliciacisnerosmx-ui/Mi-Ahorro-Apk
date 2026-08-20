@@ -52,7 +52,7 @@ export default function ReportGenerator({ open, movements, funds, settings, pres
         const dataUrl = await generatePNG(movimientosFiltrados, opts, settings, funds);
         setPreview(dataUrl);
       } else if (formato === 'pdf') {
-        const blob = generatePDF(movimientosFiltrados, opts, settings, funds);
+        const blob = await generatePDF(movimientosFiltrados, opts, settings, funds);
         const url = URL.createObjectURL(blob);
         setPreview(url);
       } else if (formato === 'whatsapp') {
@@ -68,35 +68,34 @@ export default function ReportGenerator({ open, movements, funds, settings, pres
   };
 
   const handleCompartir = async () => {
-    const filename = `mi-ahorro-reporte-${new Date().toISOString().slice(0, 10)}`;
+    const filename = `chanchullos-mys-reporte-${new Date().toISOString().slice(0, 10)}`;
     if (formato === 'png') {
       const dataUrl = await generatePNG(movimientosFiltrados, opts, settings, funds);
       const blob = await (await fetch(dataUrl)).blob();
-      await shareOrDownload({ title: 'Reporte Mi Ahorro', blob, filename: `${filename}.png` });
+      await shareOrDownload({ title: 'Reporte Chanchullos MyS', blob, filename: `${filename}.png` });
     } else if (formato === 'pdf') {
-      const blob = generatePDF(movimientosFiltrados, opts, settings, funds);
-      await shareOrDownload({ title: 'Reporte Mi Ahorro', blob, filename: `${filename}.pdf` });
+      const blob = await generatePDF(movimientosFiltrados, opts, settings, funds);
+      await shareOrDownload({ title: 'Reporte Chanchullos MyS', blob, filename: `${filename}.pdf` });
     } else if (formato === 'whatsapp') {
       const text = generateWhatsAppText(movimientosFiltrados, opts, settings, funds);
-      await shareOrDownload({ title: 'Reporte Mi Ahorro', text, filename: `${filename}.txt` });
+      await shareOrDownload({ title: 'Reporte Chanchullos MyS', text, filename: `${filename}.txt` });
     } else if (formato === 'csv') {
       const csv = generateCSV(movimientosFiltrados, settings);
       const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
-      await shareOrDownload({ title: 'Reporte Mi Ahorro', blob, filename: `${filename}.csv` });
+      await shareOrDownload({ title: 'Reporte Chanchullos MyS', blob, filename: `${filename}.csv` });
     }
   };
 
-  const handleGuardar = () => {
-    const filename = `mi-ahorro-reporte-${new Date().toISOString().slice(0, 10)}`;
+  const handleGuardar = async () => {
+    const filename = `chanchullos-mys-reporte-${new Date().toISOString().slice(0, 10)}`;
     if (formato === 'png') {
-      generatePNG(movimientosFiltrados, opts, settings, funds).then((dataUrl) => {
-        const a = document.createElement('a');
-        a.href = dataUrl;
-        a.download = `${filename}.png`;
-        a.click();
-      });
+      const dataUrl = await generatePNG(movimientosFiltrados, opts, settings, funds);
+      const a = document.createElement('a');
+      a.href = dataUrl;
+      a.download = `${filename}.png`;
+      a.click();
     } else if (formato === 'pdf') {
-      const blob = generatePDF(movimientosFiltrados, opts, settings, funds);
+      const blob = await generatePDF(movimientosFiltrados, opts, settings, funds);
       downloadBlob(blob, `${filename}.pdf`);
     } else if (formato === 'whatsapp') {
       const text = generateWhatsAppText(movimientosFiltrados, opts, settings, funds);
@@ -231,7 +230,7 @@ export default function ReportGenerator({ open, movements, funds, settings, pres
 
           {preview && (
             <div className="space-y-2">
-              <div className="bg-slate-900 rounded-xl p-3 max-h-48 overflow-y-auto">
+              <div className="bg-slate-900 rounded-xl p-3 max-h-72 overflow-y-auto app-scroll">
                 {formato === 'png' && <img src={preview} alt="Vista previa" className="w-full rounded-lg" />}
                 {formato === 'pdf' && <iframe src={preview} title="PDF" className="w-full h-48 rounded-lg bg-white" />}
                 {(formato === 'whatsapp' || formato === 'csv') && (

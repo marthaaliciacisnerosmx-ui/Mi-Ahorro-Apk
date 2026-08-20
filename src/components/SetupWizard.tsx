@@ -151,9 +151,12 @@ export default function SetupWizard({
 
         {/* Header */}
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/20 shrink-0">
-            <PiggyBank size={26} className="text-white" />
-          </div>
+          <img
+            src="/assets/chanchullos-mys-icon.png"
+            alt="Chanchullos MyS"
+            className="w-12 h-12 rounded-2xl object-contain shrink-0 bg-slate-800"
+            style={{ aspectRatio: '1 / 1' }}
+          />
           <div className="min-w-0 flex-1">
             <h1 className="text-xl font-bold text-white truncate">{settings.appName}</h1>
             <p className="text-slate-400 text-xs">Configuración inicial</p>
@@ -182,9 +185,12 @@ export default function SetupWizard({
           {step === 'welcome' && (
             <div className="space-y-6">
               <div className="text-center space-y-3 pt-8">
-                <div className="w-20 h-20 rounded-3xl bg-emerald-500/10 flex items-center justify-center mx-auto">
-                  <PiggyBank size={40} className="text-emerald-400" />
-                </div>
+                <img
+                  src="/assets/chanchullos-mys-icon.png"
+                  alt="Chanchullos MyS"
+                  className="w-20 h-20 rounded-3xl object-contain mx-auto bg-slate-800"
+                  style={{ aspectRatio: '1 / 1' }}
+                />
                 <h2 className="text-2xl font-bold text-white">¡Comencemos!</h2>
                 <p className="text-slate-400 text-sm leading-relaxed max-w-xs mx-auto">
                   Esta aplicación está vacía. Vamos a configurar lo básico para que puedas empezar a controlar tu dinero.

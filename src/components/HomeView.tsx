@@ -30,11 +30,14 @@ export default function HomeView({
   return (
     <div className="space-y-5">
       <div className="flex items-center gap-3 pt-1">
-        <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/20">
-          <PiggyBank size={24} className="text-white" />
-        </div>
-        <div>
-          <h1 className="text-xl font-bold text-white">{settings.appName}</h1>
+        <img
+          src="/assets/chanchullos-mys-icon.png"
+          alt="Chanchullos MyS"
+          className="w-12 h-12 rounded-2xl object-contain shrink-0 bg-slate-800"
+          style={{ aspectRatio: '1 / 1' }}
+        />
+        <div className="min-w-0">
+          <h1 className="text-xl font-bold text-white truncate">{settings.appName}</h1>
           <p className="text-slate-400 text-xs">Control de ahorros</p>
         </div>
       </div>

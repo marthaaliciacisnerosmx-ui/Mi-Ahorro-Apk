@@ -18,6 +18,52 @@ export interface ReportOptions {
   showCategories: boolean;
 }
 
+const LOGO_URL = '/assets/chanchullos-mys-icon.png';
+const APP_NAME = 'Chanchullos MyS';
+const APP_TAGLINE = 'Control de ahorros';
+
+let cachedLogoDataUrl: string | null = null;
+
+async function loadLogoDataUrl(): Promise<string | null> {
+  if (cachedLogoDataUrl) return cachedLogoDataUrl;
+  try {
+    const res = await fetch(LOGO_URL);
+    if (!res.ok) return null;
+    const blob = await res.blob();
+    cachedLogoDataUrl = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+    return cachedLogoDataUrl;
+  } catch (e) {
+    console.warn('No se pudo cargar el logo para el reporte', e);
+    return null;
+  }
+}
+
+async function loadLogoImage(): Promise<HTMLImageElement | null> {
+  const dataUrl = await loadLogoDataUrl();
+  if (!dataUrl) return null;
+  try {
+    const img = new Image();
+    img.src = dataUrl;
+    if (typeof img.decode === 'function') {
+      await img.decode();
+    } else {
+      await new Promise<void>((resolve, reject) => {
+        img.onload = () => resolve();
+        img.onerror = reject;
+      });
+    }
+    return img;
+  } catch (e) {
+    console.warn('No se pudo decodificar el logo', e);
+    return null;
+  }
+}
+
 export function getDefaultReportOptions(): ReportOptions {
   return {
     fundId: 'all',
@@ -78,7 +124,8 @@ export function generateWhatsAppText(
   const sym = settings.currencySymbol;
   const cur = settings.currency;
 
-  let text = `DESGLOSE DE MOVIMIENTOS\n`;
+  let text = `🐷 ${APP_NAME}\n${APP_TAGLINE}\n\n`;
+  text += `DESGLOSE DE MOVIMIENTOS\n`;
   text += `Fondo: ${fundName}\n`;
   text += `Periodo: ${label}\n\n`;
 
@@ -126,6 +173,7 @@ export function generateWhatsAppText(
 
 // --- CSV ---
 export function generateCSV(movements: MovementWithExtra[], settings: AppSettings): string {
+  const header = `# ${APP_NAME} - ${APP_TAGLINE}\n# Generado: ${new Date().toLocaleString('es-MX')}\n`;
   const headers = ['Tipo', 'Cantidad', 'Fondo', 'Fondo destino', 'Fecha', 'Hora', 'Categoria', 'Nota', 'Saldo resultante'];
   const rows = movements.map((m) => {
     const tipo = m.type === 'income' ? 'Ingreso' : m.type === 'expense' ? 'Retiro' : 'Transferencia';
@@ -141,7 +189,7 @@ export function generateCSV(movements: MovementWithExtra[], settings: AppSetting
       (m.balanceAfterCents / 100).toFixed(2),
     ];
   });
-  return [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+  return header + [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
 }
 
 // --- PNG (canvas) ---
@@ -156,13 +204,15 @@ export async function generatePNG(
   const sym = settings.currencySymbol;
   const cur = settings.currency;
 
+  const scale = 2;
   const width = 800;
   const padding = 40;
-  const lineHeight = 32;
   const cardWidth = width - padding * 2;
 
-  // Calculate height
-  const headerHeight = 200;
+  const logoImg = await loadLogoImage();
+  const logoSize = 200;
+
+  const headerHeight = 220;
   const summaryHeight = 120;
   const rowHeight = 40;
   const footerHeight = 80;
@@ -170,9 +220,10 @@ export async function generatePNG(
   const height = headerHeight + summaryHeight + contentHeight + footerHeight + padding * 2;
 
   const canvas = document.createElement('canvas');
-  canvas.width = width;
-  canvas.height = height;
+  canvas.width = width * scale;
+  canvas.height = height * scale;
   const ctx = canvas.getContext('2d')!;
+  ctx.scale(scale, scale);
 
   // Background
   ctx.fillStyle = '#0f172a';
@@ -188,28 +239,35 @@ export async function generatePNG(
 
   let y = cardY + 40;
 
-  // App name
+  // Logo
+  if (logoImg) {
+    const logoDrawSize = Math.min(logoSize, 200);
+    ctx.drawImage(logoImg, cardX + 30, y, logoDrawSize, logoDrawSize);
+  }
+
+  // App name (right of logo)
+  const textX = logoImg ? cardX + 30 + logoSize + 20 : cardX + 30;
   ctx.fillStyle = '#10b981';
   ctx.font = 'bold 28px sans-serif';
-  ctx.fillText(settings.appName, cardX + 30, y);
+  ctx.fillText(APP_NAME, textX, y + 40);
 
-  y += 35;
   ctx.fillStyle = '#94a3b8';
   ctx.font = '16px sans-serif';
-  ctx.fillText('Desglose de movimientos', cardX + 30, y);
+  ctx.fillText(APP_TAGLINE, textX, y + 70);
 
-  y += 28;
   ctx.fillStyle = '#e2e8f0';
   ctx.font = 'bold 18px sans-serif';
-  ctx.fillText(`Fondo: ${fundName}`, cardX + 30, y);
+  ctx.fillText('Desglose de movimientos', textX, y + 100);
 
-  y += 26;
   ctx.fillStyle = '#94a3b8';
   ctx.font = '14px sans-serif';
-  ctx.fillText(`Periodo: ${label}`, cardX + 30, y);
+  ctx.fillText(`Fondo: ${fundName}`, textX, y + 125);
+  ctx.fillText(`Periodo: ${label}`, textX, y + 145);
+  ctx.fillText(`Generado: ${new Date().toLocaleString('es-MX')}`, textX, y + 165);
+
+  y += headerHeight;
 
   // Separator
-  y += 20;
   ctx.strokeStyle = '#334155';
   ctx.beginPath();
   ctx.moveTo(cardX + 30, y);
@@ -291,7 +349,7 @@ export async function generatePNG(
   y = cardY + cardH - 50;
   ctx.fillStyle = '#475569';
   ctx.font = '11px sans-serif';
-  ctx.fillText(`Generado: ${new Date().toLocaleString('es-MX')}`, cardX + 30, y);
+  ctx.fillText(`Generado con ${APP_NAME}`, cardX + 30, y);
 
   return canvas.toDataURL('image/png');
 }
@@ -311,12 +369,12 @@ function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: numbe
 }
 
 // --- PDF ---
-export function generatePDF(
+export async function generatePDF(
   movements: MovementWithExtra[],
   opts: ReportOptions,
   settings: AppSettings,
   funds: Fund[],
-): Blob {
+): Promise<Blob> {
   const { label } = resolvePeriodDates(opts);
   const fundName = getFundName(opts, funds);
   const sym = settings.currencySymbol;
@@ -328,29 +386,72 @@ export function generatePDF(
   const margin = 15;
   const contentWidth = pageWidth - margin * 2;
   let y = margin;
+  let page = 1;
 
-  const addHeader = () => {
-    doc.setFillColor(15, 23, 42);
-    doc.rect(margin, y, contentWidth, 30, 'F');
+  const logoDataUrl = await loadLogoDataUrl();
+  const logoWidth = 42;
+  const logoHeight = 42;
+
+  const addFirstPageHeader = () => {
+    if (logoDataUrl) {
+      try {
+        doc.addImage(logoDataUrl, 'PNG', margin, y, logoWidth, logoHeight);
+      } catch (e) {
+        console.warn('No se pudo agregar el logo al PDF', e);
+      }
+    }
+    const textX = logoDataUrl ? margin + logoWidth + 8 : margin;
     doc.setTextColor(16, 185, 129);
-    doc.setFontSize(18);
+    doc.setFontSize(20);
     doc.setFont('helvetica', 'bold');
-    doc.text(settings.appName, margin + 5, y + 12);
+    doc.text(APP_NAME, textX, y + 14);
     doc.setTextColor(148, 163, 184);
     doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
-    doc.text('Desglose de movimientos', margin + 5, y + 20);
-    y += 38;
+    doc.text(APP_TAGLINE, textX, y + 22);
+    doc.text('Desglose de movimientos', textX, y + 30);
+    y += logoHeight + 10;
+  };
+
+  const addSubsequentPageHeader = () => {
+    if (logoDataUrl) {
+      try {
+        doc.addImage(logoDataUrl, 'PNG', margin, y, 14, 14);
+      } catch (e) {
+        console.warn('No se pudo agregar el logo al PDF', e);
+      }
+    }
+    const textX = logoDataUrl ? margin + 18 : margin;
+    doc.setTextColor(16, 185, 129);
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.text(APP_NAME, textX, y + 8);
+    doc.setTextColor(148, 163, 184);
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Página ${page}`, pageWidth - margin - 15, y + 8);
+    y += 16;
+  };
+
+  const addFooter = () => {
+    const footerY = pageHeight - 10;
+    doc.setTextColor(71, 85, 105);
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Generado con ${APP_NAME}`, margin, footerY);
   };
 
   const checkPage = () => {
     if (y > pageHeight - 30) {
+      addFooter();
       doc.addPage();
+      page++;
       y = margin;
+      addSubsequentPageHeader();
     }
   };
 
-  addHeader();
+  addFirstPageHeader();
 
   // Info
   doc.setTextColor(226, 232, 240);
@@ -362,6 +463,8 @@ export function generatePDF(
   doc.setFontSize(10);
   doc.setTextColor(148, 163, 184);
   doc.text(`Periodo: ${label}`, margin, y);
+  y += 5;
+  doc.text(`Generado: ${new Date().toLocaleString('es-MX')}`, margin, y);
   y += 10;
 
   // Summary
@@ -442,9 +545,7 @@ export function generatePDF(
   // Footer
   y += 10;
   checkPage();
-  doc.setTextColor(71, 85, 105);
-  doc.setFontSize(8);
-  doc.text(`Generado: ${new Date().toLocaleString('es-MX')}`, margin, y);
+  addFooter();
 
   return doc.output('blob');
 }

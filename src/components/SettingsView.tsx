@@ -134,6 +134,24 @@ export default function SettingsView({
         </div>
       )}
 
+      {/* Identidad de la aplicación */}
+      <div className="bg-slate-800 rounded-2xl p-4 space-y-4 border border-white/10">
+        <h3 className="text-sm font-semibold text-slate-300">Identidad de la aplicación</h3>
+        <div className="flex items-center gap-4">
+          <img
+            src="/assets/chanchullos-mys-icon.png"
+            alt="Chanchullos MyS"
+            className="w-16 h-16 rounded-2xl object-contain shrink-0 bg-slate-900"
+            style={{ aspectRatio: '1 / 1' }}
+          />
+          <div className="min-w-0">
+            <p className="text-sm text-slate-300 font-medium truncate">{settings.appName}</p>
+            <p className="text-xs text-slate-500">Logo oficial de Chanchullos MyS</p>
+          </div>
+        </div>
+        <p className="text-xs text-slate-500">El logo es fijo y no se puede eliminar. Puedes cambiar el nombre visible en la sección General.</p>
+      </div>
+
       {/* General */}
       <div className="bg-slate-800 rounded-2xl p-4 space-y-4 border border-white/10">
         <h3 className="text-sm font-semibold text-slate-300">General</h3>
