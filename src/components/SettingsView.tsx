@@ -3,6 +3,7 @@ import type { AppSettings, Category, Fund, Movement, Location } from '@/types';
 import { CURRENCIES } from '@/types';
 import { Download, Upload, FileSpreadsheet, Trash2, TriangleAlert as AlertTriangle, Check, Lock, Palette, FolderPlus, Tag, CircleAlert as AlertCircle, MapPin, Calendar, Scale, KeyRound, RotateCcw } from 'lucide-react';
 import CategoryForm from './CategoryForm';
+import Switch from './Switch';
 import { createPin, changePin, disablePin, generateNewRecoveryCode } from '@/utils/pinSecurity';
 
 interface Props {
@@ -51,7 +52,7 @@ export default function SettingsView({
 
   const mostrarMensaje = (m: string) => { setMensaje(m); setTimeout(() => setMensaje(''), 3000); };
 
-  const guardarNombre = () => { onUpdateSettings({ appName: appName.trim() || 'Mi Ahorro' }); mostrarMensaje('Nombre actualizado.'); };
+  const guardarNombre = () => { onUpdateSettings({ appName: appName.trim() || 'Chanchullos MyS' }); mostrarMensaje('Nombre actualizado.'); };
   const cambiarMoneda = (codigo: string) => {
     const moneda = CURRENCIES.find((m) => m.code === codigo);
     if (moneda) onUpdateSettings({ currency: moneda.code, currencySymbol: moneda.symbol });
@@ -151,38 +152,28 @@ export default function SettingsView({
             {CURRENCIES.map((m) => <option key={m.code} value={m.code}>{m.name} ({m.code})</option>)}
           </select>
         </div>
-        <div className="flex items-center justify-between">
-          <span className="text-sm text-slate-300">Modo oscuro</span>
-          <button onClick={() => onUpdateSettings({ darkMode: !settings.darkMode })}
-            className={`relative w-12 h-7 rounded-full transition-colors shrink-0 ${settings.darkMode ? 'bg-emerald-500' : 'bg-slate-600'}`}>
-            <span className={`absolute top-0.5 w-6 h-6 bg-white rounded-full transition-transform ${settings.darkMode ? 'translate-x-5' : 'translate-x-0.5'}`} />
-          </button>
-        </div>
+        <Switch
+          checked={settings.darkMode}
+          onChange={(v) => onUpdateSettings({ darkMode: v })}
+          label="Modo oscuro"
+        />
       </div>
 
       {/* Spending controls */}
       <div className="bg-slate-800 rounded-2xl p-4 space-y-4 border border-white/10">
         <h3 className="text-sm font-semibold text-slate-300">Control de retiros</h3>
-        <div className="flex items-center justify-between">
-          <div className="min-w-0">
-            <span className="text-sm text-slate-300 block">Bloquear retiros sin saldo</span>
-            <span className="text-xs text-slate-500">Impide retirar más del saldo disponible</span>
-          </div>
-          <button onClick={() => onUpdateSettings({ blockOverspend: !settings.blockOverspend })}
-            className={`relative w-12 h-7 rounded-full transition-colors shrink-0 ${settings.blockOverspend ? 'bg-emerald-500' : 'bg-slate-600'}`}>
-            <span className={`absolute top-0.5 w-6 h-6 bg-white rounded-full transition-transform ${settings.blockOverspend ? 'translate-x-5' : 'translate-x-0.5'}`} />
-          </button>
-        </div>
-        <div className="flex items-center justify-between">
-          <div className="min-w-0">
-            <span className="text-sm text-slate-300 block">Permitir saldo negativo</span>
-            <span className="text-xs text-slate-500">Muestra advertencia pero permite el retiro</span>
-          </div>
-          <button onClick={() => onUpdateSettings({ allowNegativeBalance: !settings.allowNegativeBalance })}
-            className={`relative w-12 h-7 rounded-full transition-colors shrink-0 ${settings.allowNegativeBalance ? 'bg-emerald-500' : 'bg-slate-600'}`}>
-            <span className={`absolute top-0.5 w-6 h-6 bg-white rounded-full transition-transform ${settings.allowNegativeBalance ? 'translate-x-5' : 'translate-x-0.5'}`} />
-          </button>
-        </div>
+        <Switch
+          checked={settings.blockOverspend}
+          onChange={(v) => onUpdateSettings({ blockOverspend: v })}
+          label="Bloquear retiros sin saldo"
+          description="Impide retirar más del saldo disponible"
+        />
+        <Switch
+          checked={settings.allowNegativeBalance}
+          onChange={(v) => onUpdateSettings({ allowNegativeBalance: v })}
+          label="Permitir saldo negativo"
+          description="Muestra advertencia pero permite el retiro"
+        />
       </div>
 
       {/* Privacy / PIN */}
@@ -248,13 +239,11 @@ export default function SettingsView({
                 <option value={15}>15 minutos</option>
               </select>
             </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-slate-300">Bloquear al salir de la app</span>
-              <button onClick={() => onUpdateSettings({ lockOnBlur: !settings.lockOnBlur })}
-                className={`relative w-12 h-7 rounded-full transition-colors shrink-0 ${settings.lockOnBlur ? 'bg-emerald-500' : 'bg-slate-600'}`}>
-                <span className={`absolute top-0.5 w-6 h-6 bg-white rounded-full transition-transform ${settings.lockOnBlur ? 'translate-x-5' : 'translate-x-0.5'}`} />
-              </button>
-            </div>
+            <Switch
+              checked={settings.lockOnBlur}
+              onChange={(v) => onUpdateSettings({ lockOnBlur: v })}
+              label="Bloquear al salir de la app"
+            />
             <div className="space-y-2 pt-2 border-t border-white/10">
               <button onClick={() => { setPinStep('enter-current'); setCurrentPin(''); setPinError(''); }}
                 className="w-full flex items-center gap-2 bg-slate-900 hover:bg-slate-700 rounded-xl px-4 py-3 text-slate-300 text-sm font-medium transition-colors min-h-[44px]">
@@ -439,7 +428,7 @@ export default function SettingsView({
         )}
       </div>
 
-      <p className="text-center text-xs text-slate-600 pt-2">Mi Ahorro · Almacenamiento local · v3.0</p>
+      <p className="text-center text-xs text-slate-600 pt-2">Chanchullos MyS · Almacenamiento local · v3.0</p>
 
       {/* Import modal */}
       {showImport && (

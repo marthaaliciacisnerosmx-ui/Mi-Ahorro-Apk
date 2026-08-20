@@ -245,7 +245,7 @@ export default function App() {
 
   if (loading || !settings) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+      <div className="h-[100dvh] bg-slate-950 flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -286,9 +286,11 @@ export default function App() {
   const selectedFund = subView.type === 'fundDetail' ? fundStats.get(subView.fundId) : null;
   const selectedLocation = subView.type === 'locationDetail' ? locationStats.get(subView.locationId) : null;
 
+  const showBottomNav = subView.type === 'main';
+
   return (
-    <div className="min-h-screen bg-slate-950 text-white">
-      <div className="max-w-md mx-auto min-h-screen px-4 pt-[env(safe-area-inset-top)] pb-24">
+    <div className="h-[100dvh] flex flex-col overflow-hidden bg-slate-950 text-white">
+      <div className="max-w-md mx-auto w-full flex-1 min-h-0 overflow-y-auto overflow-x-hidden app-scroll px-4 pt-[env(safe-area-inset-top)] pb-4">
         <div className="pt-3" />
 
         {subView.type === 'fundDetail' && selectedFund ? (
@@ -401,7 +403,7 @@ export default function App() {
         ) : null}
       </div>
 
-      {subView.type === 'main' && (
+      {showBottomNav && (
         <BottomNav active={tab} onChange={setTab} onAdd={abrirAgregar} />
       )}
 

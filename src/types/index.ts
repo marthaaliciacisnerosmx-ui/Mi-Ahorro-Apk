@@ -152,7 +152,7 @@ export const CURRENCIES = [
 ];
 
 export const DEFAULT_SETTINGS: AppSettings = {
-  appName: 'Mi Ahorro',
+  appName: 'Chanchullos MyS',
   currency: 'MXN',
   currencySymbol: '$',
   darkMode: true,
